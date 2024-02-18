@@ -1,0 +1,9 @@
+# ninja log v5
+3	1005	1708216371335854491	CMakeFiles/RAY.dir/src/aabb.cpp.o	c636867ef4ee58f0
+1	2027	1708216372359193372	CMakeFiles/RAY.dir/src/object.cpp.o	dd81ce211bb54ad
+1	2065	1708216372395860237	CMakeFiles/RAY.dir/src/container.cpp.o	b18f00eaf1106d67
+1	2188	1708216372519194239	CMakeFiles/RAY.dir/src/raytracer.cpp.o	f2fadc82ba1cfad6
+1005	2710	1708216373042530408	CMakeFiles/RAY.dir/src/resource_manager.cpp.o	f50f77ed05fdb0c3
+0	3135	1708216373465866034	CMakeFiles/RAY.dir/src/main.cpp.o	ff3ec919044b1cd4
+1	3650	1708216373979202148	CMakeFiles/RAY.dir/src/parser.cpp.o	6907343551a0004e
+3650	3794	1708216374125869608	RAY	d2b747059bc672b
