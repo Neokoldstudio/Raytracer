@@ -8,48 +8,76 @@ void Raytracer::render(const Scene& scene, Frame* output)
         z_buffer[i] = scene.camera.z_far; //Anciennement DBL_MAX. À remplacer avec la valeur de scene.camera.z_far
     }
 
-	// @@@@@@ VOTRE CODE ICI
-	// Calculez les paramètres de la caméra pour les rayons.
-	
+    // @@@@@@ VOTRE CODE ICI
+    // Calculez les paramètres de la caméra pour les rayons.
+    double3 cameraPos = scene.camera.position;
+    double fov = scene.camera.fovy;
+    double aspect_ratio = scene.resolution[0]/scene.resolution[1];
+    double viewport_height = scene.camera.z_near * tan(deg2rad(fov*0.5))*2;
+    double viewport_width = viewport_height * aspect_ratio;
+
+    double3 bottomLeftLocal = double3 {-viewport_width/2, -viewport_height/2, scene.camera.z_near};
+
+    double jittering_radius = scene.jitter_radius;
 
     // Itère sur tous les pixels de l'image.
-    for(int y = 0; y < scene.resolution[1]; y++) {
-		if (y % 40){
-			std::cout << "\rScanlines completed: " << y << "/" << scene.resolution[1] << '\r';
-		}
+    for (int y = 0; y < scene.resolution[1]; y++) {
+        if (y % 40){
+            std::cout << "\rScanlines completed: " << y << "/" << scene.resolution[1] << '\r';
+        }
 
         for(int x = 0; x < scene.resolution[0]; x++) {
 
-			int avg_z_depth = 0;
-			double3 avg_ray_color{0,0,0};
-			
-			for(int iray = 0; iray < scene.samples_per_pixel; iray++) {
-				// Génère le rayon approprié pour ce pixel.
-				Ray ray;
-				// Initialise la profondeur de récursivité du rayon.
-				int ray_depth = 0;
-				// Initialize la couleur du rayon
-				double3 ray_color{0,0,0};
+            int avg_z_depth = 0;
+            double3 avg_ray_color{0,0,0};
 
-				// @@@@@@ VOTRE CODE ICI
-				// Mettez en place le rayon primaire en utilisant les paramètres de la caméra.
-				// Lancez le rayon de manière uniformément aléatoire à l'intérieur du pixel dans la zone délimité par jitter_radius. 
-				//Faites la moyenne des différentes couleurs obtenues suite à la récursion.
-			}
+            for(int iray = 0; iray < scene.samples_per_pixel; iray++) {
+                // Génère le rayon approprié pour ce pixel.
+                Ray ray;
+                // Initialise la profondeur de récursivité du rayon.
+                int ray_depth = 0;
+                // Initialize la couleur du rayon
+                double3 ray_color{0,0,0};
 
-			avg_z_depth = avg_z_depth / scene.samples_per_pixel;
-			avg_ray_color = avg_ray_color / scene.samples_per_pixel;
+                // @@@@@@ VOTRE CODE ICI
+                // Mettez en place le rayon primaire en utilisant les paramètres de la caméra.
+                // Lancez le rayon de manière uniformément aléatoire à l'intérieur du pixel dans la zone délimité par jitter_radius.
+                // Faites la moyenne des différentes couleurs obtenues suite à la récursion.
+                double2 randomOffset = random_in_unit_disk() * jittering_radius; // generate random offset for jittering
+                double ray_depth_out;
 
-			// Test de profondeur
-			if(avg_z_depth >= scene.camera.z_near && avg_z_depth <= scene.camera.z_far && 
-				avg_z_depth < z_buffer[x + y*scene.resolution[0]]) {
-				z_buffer[x + y*scene.resolution[0]] = avg_z_depth;
+                double deltaX = x/scene.resolution[0];
+                double deltaY = y/scene.resolution[1];
 
-				// Met à jour la couleur de l'image (et sa profondeur)
-				output->set_color_pixel(x, y, avg_ray_color);
-				output->set_depth_pixel(x, y, (avg_z_depth - scene.camera.z_near) / 
-										(scene.camera.z_far-scene.camera.z_near));
-			}
+                double3 viewportPixelCoord = bottomLeftLocal + double3 {viewport_width * deltaX + randomOffset.x
+                                                                      ,viewport_height * deltaY + randomOffset.y
+                                                                      , 1.0};
+
+                double3 worldPixelCoord = cameraPos + cameraPos.x * viewportPixelCoord.x
+                                                    + cameraPos.y * viewportPixelCoord.y
+                                                    + cameraPos.z * viewportPixelCoord.z;
+                ray.origin = cameraPos;
+                ray.direction = normalize(worldPixelCoord - cameraPos);
+
+                trace(scene, ray, ray_depth, &ray_color, &ray_depth_out);
+
+                avg_ray_color += ray_color;
+                avg_z_depth += (int)ray_depth_out;
+            }
+
+            avg_z_depth = avg_z_depth / scene.samples_per_pixel;
+            avg_ray_color = avg_ray_color / scene.samples_per_pixel;
+
+            // Test de profondeur
+            if(avg_z_depth >= scene.camera.z_near && avg_z_depth <= scene.camera.z_far &&
+               avg_z_depth < z_buffer[x + y*scene.resolution[0]]) {
+                z_buffer[x + y*scene.resolution[0]] = avg_z_depth;
+
+                // Met à jour la couleur de l'image (et sa profondeur)
+                output->set_color_pixel(x, y, avg_ray_color);
+                output->set_depth_pixel(x, y, (avg_z_depth - scene.camera.z_near) /
+                                              (scene.camera.z_far-scene.camera.z_near));
+            }
         }
     }
 
@@ -85,8 +113,8 @@ void Raytracer::trace(const Scene& scene,
 		//
 		// Toutes les géométries sont des surfaces et non pas de volumes.
 
-		// *out_color = 
-		// *out_z_depth =
+		*out_color = double3 {0, 255, 0};
+		*out_z_depth = 0.0;
 	}
 }
 

@@ -1,4 +1,4 @@
-# Install script for directory: /home/deck/Desktop/dev/Infographie - TP2/extern/bitmap_image
+# Install script for directory: /u/godbertp/CLionProjects/Raytracer/extern/bitmap_image
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

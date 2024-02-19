@@ -1,4 +1,4 @@
-# Install script for directory: /home/deck/Desktop/dev/Infographie - TP2/extern/linalg
+# Install script for directory: /u/godbertp/CLionProjects/Raytracer/extern/linalg
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
