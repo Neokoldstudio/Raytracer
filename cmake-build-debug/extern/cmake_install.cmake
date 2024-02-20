@@ -1,4 +1,4 @@
-# Install script for directory: /home/deck/Desktop/dev/Infographie - TP2/extern
+# Install script for directory: /u/godbertp/CLionProjects/Raytracer/extern
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,16 +44,16 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/deck/Desktop/dev/Infographie - TP2/cmake-build-debug/extern/bitmap_image/cmake_install.cmake")
+  include("/u/godbertp/CLionProjects/Raytracer/cmake-build-debug/extern/bitmap_image/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/deck/Desktop/dev/Infographie - TP2/cmake-build-debug/extern/linalg/cmake_install.cmake")
+  include("/u/godbertp/CLionProjects/Raytracer/cmake-build-debug/extern/linalg/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/deck/Desktop/dev/Infographie - TP2/cmake-build-debug/extern/pcg32/cmake_install.cmake")
+  include("/u/godbertp/CLionProjects/Raytracer/cmake-build-debug/extern/pcg32/cmake_install.cmake")
 endif()
 

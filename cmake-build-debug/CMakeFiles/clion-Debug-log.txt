@@ -1,5 +1,14 @@
-/app/extra/clion/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/app/extra/clion/bin/ninja/linux/x64/ninja -G Ninja -S "/home/deck/Desktop/dev/Infographie - TP2" -B "/home/deck/Desktop/dev/Infographie - TP2/cmake-build-debug"
-Cur: /home/deck/Desktop/dev/Infographie - TP2 Bin: /home/deck/Desktop/dev/Infographie - TP2/cmake-build-debug
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /u/godbertp/CLionProjects/Raytracer -B /u/godbertp/CLionProjects/Raytracer/cmake-build-debug
+CMake Deprecation Warning:
+  Support for "Extra Generators" like
+
+    CodeBlocks
+
+  is deprecated and will be removed from a future version of CMake.  IDEs may
+  use the cmake-file-api(7) to view CMake-generated project build trees.
+
+
+Cur: /u/godbertp/CLionProjects/Raytracer Bin: /u/godbertp/CLionProjects/Raytracer/cmake-build-debug
 -- Configuring done (0.0s)
--- Generating done (0.0s)
--- Build files have been written to: /home/deck/Desktop/dev/Infographie - TP2/cmake-build-debug
+-- Generating done (0.4s)
+-- Build files have been written to: /u/godbertp/CLionProjects/Raytracer/cmake-build-debug
