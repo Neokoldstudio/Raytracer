@@ -110,8 +110,7 @@ void Raytracer::trace(const Scene& scene,
 		// Assumez que l'extérieur/l'air a un indice de réfraction de 1.
 		//
 		// Toutes les géométries sont des surfaces et non pas de volumes.
-
-		*out_color = double3{255, 0, 255};
+		*out_color = double3{255,0,255};
 		*out_z_depth = scene.camera.z_near + 0.01;
 	}
 }
