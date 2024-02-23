@@ -111,7 +111,7 @@ void Raytracer::trace(const Scene& scene,
 		//
 		// Toutes les géométries sont des surfaces et non pas de volumes.
 
-		*out_color = material.color_albedo;
+		*out_color = shade(scene, hit);
 		*out_z_depth = hit.depth;
 	}
 }

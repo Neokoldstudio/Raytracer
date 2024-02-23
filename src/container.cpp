@@ -23,10 +23,12 @@ bool Naive::intersect(Ray ray, double t_min, double t_max, Intersection* hit) {
 
     for(auto obj : objects) {
         Intersection tempHit;
-        if(obj->intersect(ray, t_min, closestIntersection, &tempHit)) {
-            hasIntersection = true;
-            closestIntersection = tempHit.depth;
-            *hit = tempHit;
+        if(obj->intersect(ray, t_min, t_max, &tempHit)) {
+            if(tempHit.depth<closestIntersection) {
+                hasIntersection = true;
+                closestIntersection = tempHit.depth;
+                *hit = tempHit;
+            }
         }
     }
     return hasIntersection;
