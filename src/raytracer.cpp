@@ -44,8 +44,8 @@ void Raytracer::render(const Scene& scene, Frame* output)
 				// Mettez en place le rayon primaire en utilisant les paramètres de la caméra.
 				// Lancez le rayon de manière uniformément aléatoire à l'intérieur du pixel dans la zone délimité par jitter_radius. 
 				// Faites la moyenne des différentes couleurs obtenues suite à la récursion.
-                double2 randomOffset = random_in_unit_disk();
-                double ray_depth_out;
+                double2 randomOffset = random_in_unit_disk() * jittering_radius;
+                double ray_depth_out = scene.camera.z_far;
                 double deltaX = x/scene.resolution[0];
                 double deltaY = y/scene.resolution[1];
 
@@ -111,7 +111,7 @@ void Raytracer::trace(const Scene& scene,
 		//
 		// Toutes les géométries sont des surfaces et non pas de volumes.
 		*out_color = double3{255,0,255};
-		*out_z_depth = scene.camera.z_near + 0.01;
+		*out_z_depth = hit.depth;
 	}
 }
 
