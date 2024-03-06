@@ -17,12 +17,14 @@ bool BVH::intersect(Ray ray, double t_min, double t_max, Intersection* hit) {
 //			- Si intersection, détecter l'intersection avec la géométrie.
 //				- Si intersection, mettre à jour les paramètres.
 // - Retourner l'intersection avec la profondeur maximale la plus PETITE.
+
 bool Naive::intersect(Ray ray, double t_min, double t_max, Intersection* hit) {
     bool hasIntersection = false;
     double closestIntersection = t_max;
 
     for(auto obj : objects) {
         Intersection tempHit;
+
         if(obj->intersect(ray, t_min, t_max, &tempHit)) {
             if(tempHit.depth < closestIntersection) {
                 hasIntersection = true;

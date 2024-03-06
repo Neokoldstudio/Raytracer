@@ -15,10 +15,12 @@ bool Sphere::local_intersect(Ray ray,
 							 double t_min, double t_max, 
 							 Intersection *hit) 
 {
+
     auto a = dot(ray.direction, ray.direction);
     auto b = 2.0 * dot(ray.origin, ray.direction);
-    auto c = dot(ray.origin, ray.origin) - radius * radius;
+    auto c = dot(ray.origin, ray.origin) - this->radius * this->radius;
     auto discriminant = b * b - 4 * a * c;
+
     if (discriminant < 0) return false;
 
     auto sqrt_discriminant = sqrt(discriminant);

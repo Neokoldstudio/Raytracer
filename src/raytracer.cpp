@@ -1,7 +1,7 @@
 #include "raytracer.h"
 
 void Raytracer::render(const Scene& scene, Frame* output)
-{       
+{
     // Crée le z_buffer.
     double *z_buffer = new double[scene.resolution[0] * scene.resolution[1]];
     for(int i = 0; i < scene.resolution[0] * scene.resolution[1]; i++) {
@@ -55,9 +55,9 @@ void Raytracer::render(const Scene& scene, Frame* output)
                 double3 viewportPixelCoord = bottomLeftLocal + double3 {viewport_width * deltaX + randomOffset.x
                                                                       ,viewport_height * deltaY + randomOffset.y, 1.0};
 
-                 double3 worldPixelCoord = cameraPos + viewportPixelCoord.x * right
-                                              + viewportPixelCoord.y * up
-                                              - viewportPixelCoord.z * lookAt;
+                double3 worldPixelCoord = cameraPos + viewportPixelCoord.x * right
+                                                    + viewportPixelCoord.y * up
+                                                    + viewportPixelCoord.z * lookAt;
                 ray.origin = cameraPos;
                 ray.direction = normalize(worldPixelCoord - cameraPos);
                 trace(scene, ray, ray_depth, &ray_color, &ray_depth_out);
@@ -76,8 +76,7 @@ void Raytracer::render(const Scene& scene, Frame* output)
 
 				// Met à jour la couleur de l'image (et sa profondeur)
 				output->set_color_pixel(x, y, avg_ray_color);
-				output->set_depth_pixel(x, y, (avg_z_depth - scene.camera.z_near) / 
-										(scene.camera.z_far-scene.camera.z_near));
+				output->set_depth_pixel(x, y, (avg_z_depth - scene.camera.z_near) / (scene.camera.z_far-scene.camera.z_near));
 			}
         }
     }
