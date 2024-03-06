@@ -11,8 +11,11 @@ void Raytracer::render(const Scene& scene, Frame* output)
 	// @@@@@@ VOTRE CODE ICI
 	// Calculez les paramètres de la caméra pour les rayons.
     double3 cameraPos = scene.camera.position;
+    double3 lookAt = scene.camera.center;
+    double3 up = scene.camera.up;
+    double3 right = cross(up, lookAt);
     double fov = scene.camera.fovy;
-    double aspect_ratio = scene.resolution[0]/scene.resolution[1];
+    double aspect_ratio = scene.camera.aspect;
     double viewport_height = scene.camera.z_near * tan(deg2rad(fov*0.5))*2;
     double viewport_width = viewport_height * aspect_ratio;
 
@@ -52,9 +55,9 @@ void Raytracer::render(const Scene& scene, Frame* output)
                 double3 viewportPixelCoord = bottomLeftLocal + double3 {viewport_width * deltaX + randomOffset.x
                                                                       ,viewport_height * deltaY + randomOffset.y, 1.0};
 
-                double3 worldPixelCoord = cameraPos + cameraPos.x * viewportPixelCoord.x
-                                          + cameraPos.y * viewportPixelCoord.y
-                                          + cameraPos.z * viewportPixelCoord.z;
+                 double3 worldPixelCoord = cameraPos + viewportPixelCoord.x * right
+                                              + viewportPixelCoord.y * up
+                                              - viewportPixelCoord.z * lookAt;
                 ray.origin = cameraPos;
                 ray.direction = normalize(worldPixelCoord - cameraPos);
                 trace(scene, ray, ray_depth, &ray_color, &ray_depth_out);
@@ -134,5 +137,5 @@ void Raytracer::trace(const Scene& scene,
 double3 Raytracer::shade(const Scene& scene, Intersection hit)
 {
 	// Material& material = ResourceManager::Instance()->materials[hit.key_material]; lorsque vous serez rendu à la partie texture.
-	return double3{0,0,0};
+	return double3{0,255,0};
 }

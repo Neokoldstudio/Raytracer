@@ -15,7 +15,26 @@ bool Sphere::local_intersect(Ray ray,
 							 double t_min, double t_max, 
 							 Intersection *hit) 
 {
-	return false;
+    auto a = dot(ray.direction, ray.direction);
+    auto b = 2.0 * dot(ray.origin, ray.direction);
+    auto c = dot(ray.origin, ray.origin) - radius * radius;
+    auto discriminant = b * b - 4 * a * c;
+    if (discriminant < 0) return false;
+
+    auto sqrt_discriminant = sqrt(discriminant);
+    auto root = (-b - sqrt_discriminant) / (2.0 * a);
+    if (root <= t_min || root >= t_max) {
+        root = (-b + sqrt_discriminant) / (2.0 * a);
+        if (root < t_min || root > t_max) {
+            return false;
+        }
+    }
+
+    hit->depth = root;
+    hit->position = ray.origin + root*ray.direction;
+    hit->normal = normalize(hit->position);
+    std::cout << "sphere hit ! \n "<< std::endl; 
+    return true;
 }
 
 // @@@@@@ VOTRE CODE ICI
