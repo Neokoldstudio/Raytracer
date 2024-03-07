@@ -11,11 +11,7 @@ void Raytracer::render(const Scene& scene, Frame* output)
 	// @@@@@@ VOTRE CODE ICI
 	// Calculez les paramètres de la caméra pour les rayons.
     double3 cameraPos = scene.camera.position;
-    double3 lookAt = -normalize(scene.camera.center);
-    double3 up = scene.camera.up;
-    double3 right = normalize(cross(up, lookAt));
-    double3 camUp = cross(lookAt, right);
-    double fov = scene.camera.fovy * 2;
+    double fov = scene.camera.fovy;
     double aspect_ratio = scene.camera.aspect;
     double viewport_height = scene.camera.z_near * tan(deg2rad(fov*0.5))*2;
     double viewport_width = viewport_height * aspect_ratio;
@@ -50,23 +46,14 @@ void Raytracer::render(const Scene& scene, Frame* output)
 				// Faites la moyenne des différentes couleurs obtenues suite à la récursion.
                 double2 randomOffset = random_in_unit_disk() * jittering_radius;
                 double ray_depth_out = scene.camera.z_far;
-                double deltaX = (x + randomOffset.x)/(double)scene.resolution[0];
-                double deltaY = (y + randomOffset.y)/(double)scene.resolution[1];
+                double deltaX = viewport_width/(double)scene.resolution[0];
+                double deltaY = viewport_height/(double)scene.resolution[1];
 
-                double3 viewportPixelCoord = bottomLeftLocal + double3 {viewport_width * (x + deltaX) / (double)scene.resolution[0],
-                                                                        viewport_height * (y + deltaY) / (double)scene.resolution[1],
-                                                                        0.0};
-                double3 worldPixelCoord = cameraPos +
-                                          (viewportPixelCoord.x * right) +
-                                          (viewportPixelCoord.y * camUp) +
-                                          (viewportPixelCoord.z * lookAt);
+                double3 viewportPixelCoord = bottomLeftLocal + double3 {((x+randomOffset.x) * deltaX), ((y+randomOffset.y) * deltaY), 0.0};
+
                 ray.origin = cameraPos;
                 ray.direction = normalize(viewportPixelCoord - cameraPos);
 
-    //             std::cout << "Ray Origin : (" << ray.origin.x << "," << ray.origin.y << "," << ray.origin.z << ","
-    //           << ")" << std::endl;
-    //  std::cout << "Ray Direction : (" << ray.direction.x << "," << ray.direction.y << "," << ray.direction.z << ","
-    //           << ")" << std::endl;
                 trace(scene, ray, ray_depth, &ray_color, &ray_depth_out);
 
                 avg_ray_color += ray_color;
@@ -144,5 +131,5 @@ void Raytracer::trace(const Scene& scene,
 double3 Raytracer::shade(const Scene& scene, Intersection hit)
 {
 	// Material& material = ResourceManager::Instance()->materials[hit.key_material]; lorsque vous serez rendu à la partie texture.
-	return double3{0,255,0};
+	return hit.normal;
 }
