@@ -35,7 +35,7 @@ bool Sphere::local_intersect(Ray ray,
     hit->depth = root;
     hit->position = ray.origin + root*ray.direction;
     hit->normal = normalize(hit->position);
-    std::cout << "sphere hit ! \n "<< std::endl; 
+    //std::cout << "sphere hit at : (" << hit->position.x << "," << hit->position.y << "," << hit->position.z << ")" << std::endl;
     return true;
 }
 
