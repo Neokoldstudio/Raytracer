@@ -133,9 +133,37 @@ void Raytracer::trace(const Scene& scene,
 
 double3 Raytracer::shade(const Scene& scene, Intersection hit)
 {
-    double3 ambient = scene.ambient_light;
+    Material& material = ResourceManager::Instance()->materials[hit.key_material]; // Assuming you have access to the material data.
 
-    Material& material = ResourceManager::Instance()->materials[hit.key_material]; //lorsque vous serez rendu à la partie texture.
-    double3 light = ambient *material.k_ambient *material.color_albedo;
-    return light;
+    double3 viewDirection = normalize(scene.camera.position - hit.position);
+    double3 color = material.color_albedo;
+    double3 lightDirection;
+    double3 lightDiffuse;
+    double3 lightSpecular;
+    double3 currentLight;
+    double3 finalLight;
+
+    for(auto light : scene.lights) {
+        lightDirection = normalize(light.position - hit.position);
+        
+        float lambertCoef = dot(hit.normal, lightDirection);
+        if(lambertCoef < 0.0)
+            lambertCoef = 0.0;
+
+        double3 halfwayVec = normalize(viewDirection + lightDirection);
+        float specularCoef = pow(dot(hit.normal, halfwayVec), material.shininess);
+
+        lightDiffuse = material.k_diffuse * color * lambertCoef * light.emission;
+        lightSpecular = material.k_specular * (material.metallic * color + (1 - material.metallic) * specularCoef) * light.emission;
+        
+        // Apply light attenuation based on the radius of the light source
+        currentLight = (lightDiffuse + lightSpecular);
+        finalLight += currentLight;
+    }
+
+    double3 ambient = scene.ambient_light * material.k_ambient * color;
+    finalLight += ambient;
+
+    return finalLight;
 }
+
