@@ -133,6 +133,9 @@ void Raytracer::trace(const Scene& scene,
 
 double3 Raytracer::shade(const Scene& scene, Intersection hit)
 {
-	// Material& material = ResourceManager::Instance()->materials[hit.key_material]; lorsque vous serez rendu à la partie texture.
-	return hit.normal;
+    double3 ambient = scene.ambient_light;
+
+    Material& material = ResourceManager::Instance()->materials[hit.key_material]; //lorsque vous serez rendu à la partie texture.
+    double3 light = ambient *material.k_ambient *material.color_albedo;
+    return light;
 }
