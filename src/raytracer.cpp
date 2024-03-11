@@ -138,27 +138,26 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
     double3 viewDirection = normalize(scene.camera.position - hit.position);
     double3 color = material.color_albedo;
     double3 lightDirection;
-    double3 lightDiffuse;
-    double3 lightSpecular;
+    double3 lightDiffuse = {0.0,0.0,0.0};
+    double3 lightSpecular = {0.0,0.0,0.0};;
     double3 currentLight = {0.0,0.0,0.0};
     double3 finalLight = {0.0,0.0,0.0};
+    double3 ambient = {0.0, 0.0, 0.0};
+
 
     for(auto light : scene.lights) {
         lightDirection = light.position - hit.position;
         double lightDistance = length(lightDirection);
+        lightDirection = normalize(lightDirection);
 
-
-        Ray umbraRay;
-        umbraRay.origin = hit.position;
-        umbraRay.direction = lightDirection;
+        Ray shadowRay;
+        shadowRay.origin = hit.position;
+        shadowRay.direction = lightDirection;
 
         double out_umbra_depth;
         Intersection hitUmbra;
-        double distanceToCast = lightDistance;
 
-        if (light.radius > 0.0) distanceToCast = light.radius;
-
-        if(!scene.container->intersect(umbraRay,EPSILON,distanceToCast,&hitUmbra)) {		
+        if(!scene.container->intersect(shadowRay,EPSILON,lightDistance,&hitUmbra)) {
 
             double lambertCoef = std::max(dot(hit.normal, lightDirection),0.0);
 
@@ -167,8 +166,8 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
 
             lightDiffuse = material.k_diffuse * color * lambertCoef;
 
-            lightSpecular = material.k_specular * (material.metallic * color + (1 - material.metallic))* specularCoef;
-        
+            lightSpecular = material.k_specular * (material.metallic * color + (1 - material.metallic))* specularCoef;//R
+
             currentLight = (lightDiffuse + lightSpecular)* light.emission/pow(lightDistance,2);
             finalLight += currentLight;
         }
@@ -176,9 +175,9 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
             finalLight += double3 {0.0, 0.0, 0.0};
     }
 
-    double3 ambient = scene.ambient_light * material.k_ambient * color;
+    ambient = scene.ambient_light * material.k_ambient * color;
+
     finalLight += ambient;
 
     return finalLight;
 }
-
