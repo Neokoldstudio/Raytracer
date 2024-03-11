@@ -145,19 +145,32 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
 
     for(auto light : scene.lights) {
         lightDirection = normalize(light.position - hit.position);
-        
-        float lambertCoef = dot(hit.normal, lightDirection);
-        if(lambertCoef < 0.0)
-            lambertCoef = 0.0;
-
-        double3 halfwayVec = normalize(viewDirection + lightDirection);
-        double specularCoef = pow(dot(hit.normal, halfwayVec), material.shininess);
         double lightDistance = length(lightDirection);
-        lightDiffuse = material.k_diffuse * color * lambertCoef;
-        lightSpecular = material.k_specular * (material.metallic * color + (1 - material.metallic))* specularCoef;
+
+
+        Ray umbraRay;
+        umbraRay.origin = hit.position;
+        umbraRay.direction = lightDirection;
+
+        double out_umbra_depth;
+        Intersection hitUmbra;
     
-        currentLight = (lightDiffuse + lightSpecular)* light.emission/lightDistance;
-        finalLight += currentLight;
+        if(!scene.container->intersect(umbraRay,EPSILON,lightDistance,&hitUmbra)) {		
+
+            float lambertCoef = dot(hit.normal, lightDirection);
+            if(lambertCoef < 0.0)
+                lambertCoef = 0.0;
+
+            double3 halfwayVec = normalize(viewDirection + lightDirection);
+            double specularCoef = pow(dot(hit.normal, halfwayVec), material.shininess);
+            lightDiffuse = material.k_diffuse * color * lambertCoef;
+            lightSpecular = material.k_specular * (material.metallic * color + (1 - material.metallic))* specularCoef;
+        
+            currentLight = (lightDiffuse + lightSpecular)* light.emission/lightDistance;
+            finalLight += currentLight;
+        }
+        else
+            finalLight += double3 {0.0, 0.0, 0.0};
     }
 
     double3 ambient = scene.ambient_light * material.k_ambient * color;
