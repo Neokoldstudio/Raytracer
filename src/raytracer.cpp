@@ -151,12 +151,12 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
             lambertCoef = 0.0;
 
         double3 halfwayVec = normalize(viewDirection + lightDirection);
-        float specularCoef = pow(dot(hit.normal, halfwayVec), material.shininess);
-
-        lightDiffuse = material.k_diffuse * color * lambertCoef * light.emission;
-        lightSpecular = material.k_specular * (material.metallic * color + (1 - material.metallic))* specularCoef * light.emission;
-        // Apply light attenuation based on the radius of the light source
-        currentLight = (lightDiffuse + lightSpecular);
+        double specularCoef = pow(dot(hit.normal, halfwayVec), material.shininess);
+        double lightDistance = length(lightDirection);
+        lightDiffuse = material.k_diffuse * color * lambertCoef;
+        lightSpecular = material.k_specular * (material.metallic * color + (1 - material.metallic))* specularCoef;
+    
+        currentLight = (lightDiffuse + lightSpecular)* light.emission/lightDistance;
         finalLight += currentLight;
     }
 
