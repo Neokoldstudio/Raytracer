@@ -140,11 +140,11 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
     double3 lightDirection;
     double3 lightDiffuse;
     double3 lightSpecular;
-    double3 currentLight;
-    double3 finalLight;
+    double3 currentLight = {0.0,0.0,0.0};
+    double3 finalLight = {0.0,0.0,0.0};
 
     for(auto light : scene.lights) {
-        lightDirection = normalize(light.position - hit.position);
+        lightDirection = light.position - hit.position;
         double lightDistance = length(lightDirection);
 
 
@@ -154,19 +154,22 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
 
         double out_umbra_depth;
         Intersection hitUmbra;
-    
-        if(!scene.container->intersect(umbraRay,EPSILON,lightDistance,&hitUmbra)) {		
+        double distanceToCast = lightDistance;
 
-            float lambertCoef = dot(hit.normal, lightDirection);
-            if(lambertCoef < 0.0)
-                lambertCoef = 0.0;
+        if (light.radius > 0.0) distanceToCast = light.radius;
+
+        if(!scene.container->intersect(umbraRay,EPSILON,distanceToCast,&hitUmbra)) {		
+
+            double lambertCoef = std::max(dot(hit.normal, lightDirection),0.0);
 
             double3 halfwayVec = normalize(viewDirection + lightDirection);
-            double specularCoef = pow(dot(hit.normal, halfwayVec), material.shininess);
+            double specularCoef = pow(std::max(dot(hit.normal, halfwayVec),0.0), material.shininess);
+
             lightDiffuse = material.k_diffuse * color * lambertCoef;
+
             lightSpecular = material.k_specular * (material.metallic * color + (1 - material.metallic))* specularCoef;
         
-            currentLight = (lightDiffuse + lightSpecular)* light.emission/lightDistance;
+            currentLight = (lightDiffuse + lightSpecular)* light.emission/pow(lightDistance,2);
             finalLight += currentLight;
         }
         else
