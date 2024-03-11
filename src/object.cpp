@@ -118,6 +118,9 @@ bool Cylinder::local_intersect(Ray ray,
     double3 point = ray.origin + root*ray.direction;
     // Vérification de l'appartenance du point au cylindre (si le premier point est trop "loin", check le deuxième)
     // évite des problèmes qui pourrait s'apparenter à du backface culling (ce n'en est pas en réalité, l'effet est trompeur)
+
+    double3 normal = {point.x, 0.0, point.z};
+
     if (point.y < -half_height || point.y > half_height) {
         root = root2;
         point = ray.origin + root * ray.direction;
@@ -125,8 +128,8 @@ bool Cylinder::local_intersect(Ray ray,
             return false;
         }
     }
-
-    double3 normal = {point.x, 0.0, point.z};
+    else
+        normal = -normal;
 
     hit->depth = root;
     hit->position = point;
