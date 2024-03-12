@@ -13,7 +13,7 @@ int rsign(double value, double v0, double v1) {
 // Pour plus de d'informations sur la géométrie, référez-vous à la classe object.h.
 bool Sphere::local_intersect(Ray ray, 
 							 double t_min, double t_max, 
-							 Intersection *hit) 
+							 Intersection *hit)
 {
 
     auto a = dot(ray.direction, ray.direction);
@@ -42,6 +42,27 @@ bool Sphere::local_intersect(Ray ray,
 // Occupez-vous de compléter cette fonction afin de calculer le AABB pour la sphère.
 // Il faut que le AABB englobe minimalement notre objet à moins que l'énoncé prononce le contraire (comme ici).
 AABB Sphere::compute_aabb() {
+    //On prend le bon x, y et z, les plus extrèmes, devrait avoir 6 pts
+    //genre x=0, ou y=0, ou z=0
+    //on appel la fonction retrieve corners
+    //On veut pt milieu + rayon dans directions x=0, ou y=0, ou z=0 pour trouver les extrémités
+    //On a le rayon
+    //float minX;
+    //1-Trouver les coor
+    //2->On fait construct après avoir récupéré liste de pts donné par retrieve corners
+    //double3 pointMin;
+    //double3 pointMax;
+    //AABB(double3& minExtents, double3& maxExtents) :
+    double3 pt_milieu_Sphere = {0, 0, 0};
+    double rayon = Sphere::radius;
+    double3 pt_externeX_plus = {pt_milieu_Sphere.x + rayon, 0, 0};
+    double3 pt_externeX_moins = {-(pt_milieu_Sphere.x + rayon), 0, 0};
+    double3 pt_externeY_plus = {0, pt_milieu_Sphere.x + rayon, 0};
+    double3 pt_externeY_moins = {0, -(pt_milieu_Sphere.x + rayon), 0};
+    double3 pt_externeZ_plus = {0, 0, pt_milieu_Sphere.x + rayon};
+    double3 pt_externeZ_moins = {0, 0, -(pt_milieu_Sphere.x + rayon)};
+
+
 	return Object::compute_aabb();
 }
 
@@ -142,6 +163,8 @@ bool Cylinder::local_intersect(Ray ray,
 // Occupez-vous de compléter cette fonction afin de calculer le AABB pour le cylindre.
 // Il faut que le AABB englobe minimalement notre objet à moins que l'énoncé prononce le contraire (comme ici).
 AABB Cylinder::compute_aabb() {
+    //get les points de la shpere
+
 	return Object::compute_aabb();
 }
 
