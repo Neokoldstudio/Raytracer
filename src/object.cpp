@@ -42,19 +42,43 @@ bool Sphere::local_intersect(Ray ray,
 // Occupez-vous de compléter cette fonction afin de calculer le AABB pour la sphère.
 // Il faut que le AABB englobe minimalement notre objet à moins que l'énoncé prononce le contraire (comme ici).
 AABB Sphere::compute_aabb() {
-    //On prend le bon x, y et z, les plus extrèmes, devrait avoir 6 pts
-    //genre x=0, ou y=0, ou z=0
-    //on appel la fonction retrieve corners
-    //On veut pt milieu + rayon dans directions x=0, ou y=0, ou z=0 pour trouver les extrémités
-    //On a le rayon
-    //float minX;
-    //1-Trouver les coor
-    //2->On fait construct après avoir récupéré liste de pts donné par retrieve corners
-    //double3 pointMin;
-    //double3 pointMax;
-    //AABB(double3& minExtents, double3& maxExtents) :
+    //RAPPEL:
+    //      double3 pointMin;
+    //      double3 pointMax;
+    //      Le rayon est un double
+
+    //ICI, 2 options:
+    // (1) Soit on calc pour de vrai tous les pts et c'est pas tant précis et ca fait des problèmes et c'est long
+    // (2) Ou tout simplement, on part du point milieu qui est 0,0,0 et on additionne le rayon
+
+    //(1)
+    //On fait un conteneur pts dans lequel on va mettre les pts
+    std::vector<double3> pts;
+    //On a le rayon, alors on peut calculer tous les pts de la sphère
+    //Alors, on va calculer les pts avec une formule
+    const double theta_max = 2*PI; // Nombre d'étapes pour theta, initialement 20
+    const double phi_max = PI; // Nombre d'étapes pour phi, initialement 40
+
+    for (int i = 0; i <= theta_max*10; ++i) {
+        double theta = PI * i / theta_max;
+        for (int j = 0; j <= phi_max*10; ++j) {
+            double phi = 2 * PI * j / phi_max;
+            double x = radius * sin(theta) * cos(phi);
+            double y = radius * sin(theta) * sin(phi);
+            double z = radius * cos(theta);
+
+            pts.emplace_back(x, y, z); //remplacer par push_back???
+        }
+    }
+    //ENCORE des problèmes avec, mais on est presque là
+    //Faire des mods pour érduire les redondances !!!
+
+
+    /*
+    //(2)
+    //On peut juste faire ca et ca fonctionne déjà, JSP trop
     double3 pt_milieu_Sphere = {0, 0, 0};
-    double rayon = Sphere::radius;
+
     double3 pt_externeX_plus = {pt_milieu_Sphere.x + rayon, 0, 0};
     double3 pt_externeX_moins = {-(pt_milieu_Sphere.x + rayon), 0, 0};
     double3 pt_externeY_plus = {0, pt_milieu_Sphere.x + rayon, 0};
@@ -62,6 +86,16 @@ AABB Sphere::compute_aabb() {
     double3 pt_externeZ_plus = {0, 0, pt_milieu_Sphere.x + rayon};
     double3 pt_externeZ_moins = {0, 0, -(pt_milieu_Sphere.x + rayon)};
 
+    //pts.push_back(pt_milieu_Sphere);
+    pts.push_back(pt_externeX_plus);
+    pts.push_back(pt_externeX_moins);
+    pts.push_back(pt_externeY_plus);
+    pts.push_back(pt_externeY_moins);
+    pts.push_back(pt_externeZ_plus);
+    pts.push_back(pt_externeZ_moins);
+    */
+
+    construct_aabb(pts);
 
 	return Object::compute_aabb();
 }
@@ -101,8 +135,10 @@ bool Quad::local_intersect(Ray ray,
 // Occupez-vous de compléter cette fonction afin de calculer le AABB pour le quad (rectangle).
 // Il faut que le AABB englobe minimalement notre objet à moins que l'énoncé prononce le contraire.
 AABB Quad::compute_aabb() {
+    //half-size -> demi largeur
+
+
 	return Object::compute_aabb();
-	//return Object::compute_aabb();
 }
 
 // @@@@@@ VOTRE CODE ICI
@@ -163,7 +199,8 @@ bool Cylinder::local_intersect(Ray ray,
 // Occupez-vous de compléter cette fonction afin de calculer le AABB pour le cylindre.
 // Il faut que le AABB englobe minimalement notre objet à moins que l'énoncé prononce le contraire (comme ici).
 AABB Cylinder::compute_aabb() {
-    //get les points de la shpere
+    //radius -> rayon du cercle
+    //half_height -> demi hauteur du cylindre par rapport à l'origine
 
 	return Object::compute_aabb();
 }
