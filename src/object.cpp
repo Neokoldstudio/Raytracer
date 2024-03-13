@@ -72,6 +72,7 @@ bool Quad::local_intersect(Ray ray,
     hit->depth = t;
     hit->position = point;
     hit->normal = normalize(normal);
+    hit->uv = {(point.x/half_size), (point.y/half_size)};
 
     return true;
 }
