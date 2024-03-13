@@ -42,19 +42,21 @@ bool Sphere::local_intersect(Ray ray,
 // Occupez-vous de compléter cette fonction afin de calculer le AABB pour la sphère.
 // Il faut que le AABB englobe minimalement notre objet à moins que l'énoncé prononce le contraire (comme ici).
 AABB Sphere::compute_aabb() {
-    //RAPPEL:
-    //      double3 pointMin;
-    //      double3 pointMax;
-    //      Le rayon est un double
 
     //ICI, 2 options:
     // (1) Soit on calc pour de vrai tous les pts et c'est pas tant précis et ca fait des problèmes et c'est long
     // (2) Ou tout simplement, on part du point milieu qui est 0,0,0 et on additionne le rayon
 
+    ////On fait un conteneur pts dans lequel on va mettre les pts
+    std::vector<double3> pts_Sphere;
+
+    /*
     //(1)
     //On fait un conteneur pts dans lequel on va mettre les pts
-    std::vector<double3> pts;
+    //std::vector<double3> pts_Sphere;
     //On a le rayon, alors on peut calculer tous les pts de la sphère
+
+
     //Alors, on va calculer les pts avec une formule
     const double theta_max = 2*PI; // Nombre d'étapes pour theta, initialement 20
     const double phi_max = PI; // Nombre d'étapes pour phi, initialement 40
@@ -67,35 +69,82 @@ AABB Sphere::compute_aabb() {
             double y = radius * sin(theta) * sin(phi);
             double z = radius * cos(theta);
 
-            pts.emplace_back(x, y, z); //remplacer par push_back???
+            pts_Sphere.emplace_back(x, y, z); //remplacer par push_back???
         }
     }
     //ENCORE des problèmes avec, mais on est presque là
     //Faire des mods pour érduire les redondances !!!
+    */
 
-
-    /*
     //(2)
     //On peut juste faire ca et ca fonctionne déjà, JSP trop
     double3 pt_milieu_Sphere = {0, 0, 0};
-
-    double3 pt_externeX_plus = {pt_milieu_Sphere.x + rayon, 0, 0};
-    double3 pt_externeX_moins = {-(pt_milieu_Sphere.x + rayon), 0, 0};
-    double3 pt_externeY_plus = {0, pt_milieu_Sphere.x + rayon, 0};
-    double3 pt_externeY_moins = {0, -(pt_milieu_Sphere.x + rayon), 0};
-    double3 pt_externeZ_plus = {0, 0, pt_milieu_Sphere.x + rayon};
-    double3 pt_externeZ_moins = {0, 0, -(pt_milieu_Sphere.x + rayon)};
-
-    //pts.push_back(pt_milieu_Sphere);
-    pts.push_back(pt_externeX_plus);
-    pts.push_back(pt_externeX_moins);
-    pts.push_back(pt_externeY_plus);
-    pts.push_back(pt_externeY_moins);
-    pts.push_back(pt_externeZ_plus);
-    pts.push_back(pt_externeZ_moins);
+    //ptmilieu + radius? -> jsp si change qlq chose
+    /*
+    double3 pt_externeX_plus = {pt_milieu_Sphere.x + radius, 0, 0};
+    double3 pt_externeX_moins = {-(pt_milieu_Sphere.x + radius), 0, 0};
+    double3 pt_externeY_plus = {0, pt_milieu_Sphere.y + radius, 0};
+    double3 pt_externeY_moins = {0, -(pt_milieu_Sphere.y + radius), 0};
+    double3 pt_externeZ_plus = {0, 0, pt_milieu_Sphere.z + radius};
+    double3 pt_externeZ_moins = {0, 0, -(pt_milieu_Sphere.z + radius)};
     */
 
-    construct_aabb(pts);
+    double3 pt_Spheremin = {-(pt_milieu_Sphere.x + Sphere::radius), -(pt_milieu_Sphere.y + Sphere::radius), -(pt_milieu_Sphere.z + Sphere::radius)};
+    double3 pt_Spheremax = {pt_milieu_Sphere.x + Sphere::radius, pt_milieu_Sphere.y + Sphere::radius, pt_milieu_Sphere.z + Sphere::radius};
+
+    //pts.push_back(pt_milieu_Sphere);
+    /*
+    pts_Sphere.push_back(pt_externeX_plus);
+    pts_Sphere.push_back(pt_externeX_moins);
+    pts_Sphere.push_back(pt_externeY_plus);
+    pts_Sphere.push_back(pt_externeY_moins);
+    pts_Sphere.push_back(pt_externeZ_plus);
+    pts_Sphere.push_back(pt_externeZ_moins);
+    */
+    pts_Sphere.push_back(pt_Spheremin);
+    pts_Sphere.push_back(pt_Spheremax);
+
+    //Nouv tentative
+    //On créé un objet spécifique sphere locale qui va calculer les coor min et max locales
+    //On appel les fonctions de aabb par la suite
+    AABB sphere_locale = construct_aabb(pts_Sphere);
+    retrieve_corners(sphere_locale);
+
+    //Sphere::transform[0].w;
+
+    //Transformer espace objet vers espace global, on multiplie les pts par la matrice de transformation
+    //double minX_Shpere = (Sphere::transform[0].x * sphere_locale.min.x) + (Sphere::transform[0].y * sphere_locale.min.y) + (Sphere::transform[0].z * sphere_locale.min.z) + (Sphere::transform[0].w * 1);
+    //double minY_Shpere = (Sphere::transform[1].x * sphere_locale.min.x) + (Sphere::transform[1].y * sphere_locale.min.y) + (Sphere::transform[1].z * sphere_locale.min.z) + (Sphere::transform[1].w * 1);
+    //double minZ_Sphere = (Sphere::transform[2].x * sphere_locale.min.x) + (Sphere::transform[2].y * sphere_locale.min.y) + (Sphere::transform[2].z * sphere_locale.min.z) + (Sphere::transform[2].w * 1);
+    //double3 pt_Shpere_min_globale = { minX_Shpere, minY_Shpere, minZ_Sphere};
+    for (int i = 0; i < 4; ++i){
+        std::cout<<"transform x : " << Sphere::transform[i].x <<"    " << "transform y : " <<Sphere::transform[i].y <<"    " <<"transform z : " << Sphere::transform[i].z << "\n";
+    }
+
+    //1-On fait un nouvel objet AABB local (dans object.cpp) en appelant la fonction construct_aabb (dans aabb.cpp)
+    //  la fonction nous retourne un AABB
+    //2-Avec l'info retournée, on calcul les coins locaux en faisant appel dans la sphere(dans object.cpp) à la fonction retrieve_corners (dans aabb.cpp)
+    //  la fonction nous retourne une liste de coins
+    //3-Puisqu'on a les points locaux des formes (dans object.cpp), on veut mtn faire la transformation pour l'espace global
+    //  DANS object.h sont définies les fonctions suivantes : double4x4 transform;   // Transformation de l'espace de l'objet à l'espace global (local --> global).
+    //                                                        double4x4 i_transform; // Transformation de l'espace de global à l'espace de l'objet (global --> local).
+    //
+    //                                                        double3x3 n_transform; // Transformation de l'espace de l'objet à l'espace global pour les normales (local --> global).
+    //LIVE j'essaie de mult les points trouvés par la matrice transform
+    //  mais jsp si c'est comme ca qu'on doit faire
+
+    //compute_aabb() renvoit un aabb, JAI l'impression qu'on va devoir le changer pour renvoyer le AABB de la sphère globale
+    //AUSSI, ya pleins de choses définies dans object.h qui semblent important, mais jps trop comment m'en servir
+
+    //Faudrait transformer le pt_milieu PEUT pas fonctionner pcq c'est tout à 0, à moins que le w transforme comme il faut
+    //double3 point_milieu_Sphere_Global;
+    //double minX_Shpere = (Sphere::transform[0].x * sphere_locale.min.x) + (Sphere::transform[0].y * sphere_locale.min.y) + (Sphere::transform[0].z * sphere_locale.min.z) + (Sphere::transform[0].w * 1);
+    //double minY_Shpere = (Sphere::transform[1].x * sphere_locale.min.x) + (Sphere::transform[1].y * sphere_locale.min.y) + (Sphere::transform[1].z * sphere_locale.min.z) + (Sphere::transform[1].w * 1);
+    //double minZ_Sphere = (Sphere::transform[2].x * sphere_locale.min.x) + (Sphere::transform[2].y * sphere_locale.min.y) + (Sphere::transform[2].z * sphere_locale.min.z) + (Sphere::transform[2].w * 1);
+
+
+
+    //avant, je faisais : construct_aabb(pts_Sphere); mais je crois pas que ce soit bon
 
 	return Object::compute_aabb();
 }
@@ -136,7 +185,42 @@ bool Quad::local_intersect(Ray ray,
 // Il faut que le AABB englobe minimalement notre objet à moins que l'énoncé prononce le contraire.
 AABB Quad::compute_aabb() {
     //half-size -> demi largeur
+    //C'EST quoi la hauteur????
+    //C'EST UN RECTANGLE, TOUTES les faces sont des rectangles?
+    //ICI, QUAD est fait en carré !!!!!!!!
 
+    std::vector<double3> pts_Quad;
+
+    double3 pt_milieu_Quad = {0, 0, 0};
+    //ptmilieu + half_size? -> jsp si change qlq chose
+    //         /|__/|
+    //         |/__|/
+    /*
+    double3 pt_milieuFaceDroit = {pt_milieu_Quad.x + half_size, 0, 0};
+    double3 pt_milieuFaceGauche = {-(pt_milieu_Quad.x + half_size), 0, 0};
+    double3 pt_milieu_FaceDevant = {0, pt_milieu_Quad.y + half_size, 0};
+    double3 pt_milieu_FaceDerriere = {0, -(pt_milieu_Quad.y + half_size), 0};
+    double3 pt_milieu_FaceHaut = {0, 0, pt_milieu_Quad.z + half_size};
+    double3 pt_milieu_FaceBas = {0,0, -(pt_milieu_Quad.z + half_size)};
+     */
+
+    double3 pt_Quadmin = {-(pt_milieu_Quad.x + half_size), -(pt_milieu_Quad.y + half_size), -(pt_milieu_Quad.z + half_size)};
+    double3 pt_Quadmax = {pt_milieu_Quad.x + half_size, pt_milieu_Quad.y + half_size, pt_milieu_Quad.z + half_size};
+
+    /*
+    pts_Quad.push_back(pt_milieuFaceDroit);
+    pts_Quad.push_back(pt_milieuFaceGauche);
+    pts_Quad.push_back(pt_milieu_FaceDevant);
+    pts_Quad.push_back(pt_milieu_FaceDerriere);
+    pts_Quad.push_back(pt_milieu_FaceHaut);
+    pts_Quad.push_back(pt_milieu_FaceBas);
+    */
+    pts_Quad.push_back(pt_Quadmin);
+    pts_Quad.push_back(pt_Quadmax);
+
+    //construct_aabb(pts_Quad);
+    AABB quad_locale = construct_aabb(pts_Quad);
+    retrieve_corners(quad_locale);
 
 	return Object::compute_aabb();
 }
@@ -201,6 +285,35 @@ bool Cylinder::local_intersect(Ray ray,
 AABB Cylinder::compute_aabb() {
     //radius -> rayon du cercle
     //half_height -> demi hauteur du cylindre par rapport à l'origine
+
+    //Fonctionne pas pcq pas carré?
+
+    std::vector<double3> pts_Cyl;
+
+    double3 pt_milieu_Cyl = {0, 0, 0};
+
+    //Checker si c'est le fait que ca soit pas carré
+    double largeur_cyl;
+    double hauteur_cyl;
+    if (Cylinder::radius < half_height){
+        largeur_cyl = half_height;
+        hauteur_cyl = half_height;
+    }else{
+        largeur_cyl = Cylinder::radius;
+        hauteur_cyl = Cylinder::radius;
+    }
+
+    double3 pt_Cylmin = {-(pt_milieu_Cyl.x + hauteur_cyl + largeur_cyl), -(pt_milieu_Cyl.y + hauteur_cyl + largeur_cyl), -(pt_milieu_Cyl.z + hauteur_cyl + largeur_cyl)};
+    double3 pt_Cylmax = {pt_milieu_Cyl.x + hauteur_cyl + largeur_cyl, pt_milieu_Cyl.y + hauteur_cyl + largeur_cyl, pt_milieu_Cyl.z + hauteur_cyl + largeur_cyl};
+
+    pts_Cyl.push_back(pt_Cylmin);
+    pts_Cyl.push_back(pt_Cylmax);
+
+    std::cout <<"cylindre? "<< pt_Cylmin.x;
+
+    //construct_aabb(pts_Cyl);
+    AABB cyl_locale = construct_aabb(pts_Cyl);
+    retrieve_corners(cyl_locale);
 
 	return Object::compute_aabb();
 }

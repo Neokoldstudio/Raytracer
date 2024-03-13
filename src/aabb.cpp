@@ -18,14 +18,20 @@ bool AABB::intersect(Ray ray, double t_min, double t_max)  {
 
 // @@@@@@ VOTRE CODE ICI
 // Implémenter la fonction qui permet de trouver les 8 coins de notre AABB.
+//CODE BING AI
+//double Dist = hypot(hypot(aabb.max.x - aabb.min.x, aabb.max.y - aabb.min.y), aabb.max.z - aabb.min.z); //On veut la distance entre les deux points, MAIS chui pas capable de get les x,y,z ...... nvm, c'est comme ca :"aabb.min.x"
 std::vector<double3> retrieve_corners(AABB aabb) {
     //On appel cette fonc à partir de construct_aabb
     //On recoit les min et les max
-    //CODE BING AI
-    //double Dist = hypot(hypot(aabb.max.x - aabb.min.x, aabb.max.y - aabb.min.y), aabb.max.z - aabb.min.z); //On veut la distance entre les deux points, MAIS chui pas capable de get les x,y,z ...... nvm, c'est comme ca :"aabb.min.x"
 
     std::vector<double3> coins;
     //On veut mettre les points uns par dessus les autres
+
+    //PROF ----------------------------------------------------------------------------------------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //On doit trouver les matrices de T pour mettre dans l'espace golbal
+    //PUIS faire en sorte que la boite reste allignée
+    //S'assurer d'un volume = si rectangle est planaire bha ya uncun volume
+
 
     //So basically, si on se met exactement au dessu du point minimum, mais à la hauteur du point maximum, ca nous donne le coin droit,devant,haut
     //Gauche/Droite : aabb.min.x/aabb.max.x
@@ -54,6 +60,13 @@ std::vector<double3> retrieve_corners(AABB aabb) {
     coins.push_back(coinDroitDerriereBas);
     coins.push_back(coinGaucheDerriereBas);
 
+    /*
+    //IMPRIMER pour valider
+    for (const auto& point : coins) {
+        std::cout << "x : " << point.x <<"\n" << "y : " << point.y << "\n" << "z : " << point.z << "\n" << "\n";
+    }
+    */
+
     //return std::vector<double3>{};
     return coins;
 };
@@ -66,7 +79,6 @@ AABB construct_aabb(std::vector<double3> points) {
     // puis on appel retrive_corners                    (2)
     //      avec retrive_corners, on get les coins      (3)
     //Une fois qu'on get les coins, on calc le volume.  (4)
-
 
 
     //(1)
@@ -100,10 +112,12 @@ AABB construct_aabb(std::vector<double3> points) {
 
     //(2)
     //ENSUITE, on appel la fonction retrieve_corners avec notre nouvel AABB
-    retrieve_corners(AABB{double3{minX,minY,minZ},double3{maxX,maxY,maxZ}});
+    //retrieve_corners(AABB{double3{minX,minY,minZ},double3{maxX,maxY,maxZ}});
+    //On va appeler cette fonction à partir de object
+    //Pour ca, faut retourner le AABB
 
-
-
+	//return AABB{double3{-DBL_MAX,-DBL_MAX,-DBL_MAX},double3{DBL_MAX,DBL_MAX,DBL_MAX}};
+    return AABB{double3{minX,minY,minZ},double3{maxX,maxY,maxZ}};
     /*
     for (const auto& point : points){
         int x = 8.0;
@@ -117,8 +131,6 @@ AABB construct_aabb(std::vector<double3> points) {
         //pour le moment, ca fonctionne -> on passe à travers la liste des pts en ordre.
 
     }*/
-
-	return AABB{double3{-DBL_MAX,-DBL_MAX,-DBL_MAX},double3{DBL_MAX,DBL_MAX,DBL_MAX}};
 };
 
 AABB combine(AABB a, AABB b) {
