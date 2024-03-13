@@ -101,17 +101,35 @@ void Raytracer::trace(const Scene& scene,
     if(scene.container->intersect(ray,EPSILON,*out_z_depth,&hit)) {		
 		Material& material = ResourceManager::Instance()->materials[hit.key_material];
 
-		// @@@@@@ VOTRE CODE ICI
-		// Déterminer la couleur associée à la réflection d'un rayon de manière récursive.
-		
-		// @@@@@@ VOTRE CODE ICI
-		// Déterminer la couleur associée à la réfraction d'un rayon de manière récursive.
-		// 
-		// Assumez que l'extérieur/l'air a un indice de réfraction de 1.
-		//
-		// Toutes les géométries sont des surfaces et non pas de volumes.
+        double3 reflexion_color = {0,0,0};
+        double3 refraction_color = {0,0,0};
 
-		*out_color = shade(scene, hit);
+
+        if(ray_depth <= 1){
+            // @@@@@@ VOTRE CODE ICI
+            // Déterminer la couleur associée à la réflection d'un rayon de manière récursive.
+            Ray reflexion;
+            reflexion.origin = hit.position;
+            reflexion.direction = -normalize(2 * dot(ray.direction, hit.normal) * hit.normal - ray.direction);
+            double reflexionDepth = scene.camera.z_far;
+            trace(scene, reflexion, ray_depth+1, &reflexion_color, &reflexionDepth);
+            // @@@@@@ VOTRE CODE ICI
+            // Déterminer la couleur associée à la réfraction d'un rayon de manière récursive.
+            //
+            // Assumez que l'extérieur/l'air a un indice de réfraction de 1.
+            //
+            // Toutes les géométries sont des surfaces et non pas de volumes.
+            Ray refraction;
+            refraction.origin = hit.position;
+            double eta = 1/material.refractive_index;
+            double NdotV = dot(hit.normal, ray.direction);
+            
+            refraction.direction = normalize(hit.normal * (eta * NdotV-std::sqrt(1-(eta*eta)*(1-pow(NdotV,2)))) - eta*ray.direction);
+            double refractionDepth = scene.camera.z_far;
+            trace(scene, refraction, ray_depth + 1, &refraction_color, &refractionDepth);
+        }
+		
+		*out_color = shade(scene, hit) + reflexion_color * material.k_reflection + refraction_color * material.k_refraction;
 		*out_z_depth = hit.depth;
 	}
 }
