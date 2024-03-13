@@ -15,6 +15,7 @@ bool Sphere::local_intersect(Ray ray,
 							 double t_min, double t_max, 
 							 Intersection *hit) 
 {
+    if(length(ray.origin)<=radius + EPSILON) return false;
 
     auto a = dot(ray.direction, ray.direction);
     auto b = 2.0 * dot(ray.origin, ray.direction);
