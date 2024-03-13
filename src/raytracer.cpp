@@ -110,7 +110,7 @@ void Raytracer::trace(const Scene& scene,
             // Déterminer la couleur associée à la réflection d'un rayon de manière récursive.
             Ray reflexion;
             reflexion.origin = hit.position;
-            reflexion.direction = -normalize(2 * dot(ray.direction, hit.normal) * hit.normal - ray.direction);
+            reflexion.direction = -normalize(2 * dot(ray.direction, hit.normal) * hit.normal - ray.direction); //formule de reflection mirroir
             double reflexionDepth = scene.camera.z_far;
             trace(scene, reflexion, ray_depth+1, &reflexion_color, &reflexionDepth);
             // @@@@@@ VOTRE CODE ICI
@@ -122,9 +122,11 @@ void Raytracer::trace(const Scene& scene,
             Ray refraction;
             refraction.origin = hit.position;
             double eta = 1/material.refractive_index;
-            double NdotV = dot(hit.normal, ray.direction);
-            
-            refraction.direction = normalize(hit.normal * (eta * NdotV-std::sqrt(1-(eta*eta)*(1-pow(NdotV,2)))) - eta*ray.direction);
+            double cos_theta = dot(-ray.direction, hit.normal);
+            // Calculate the discriminant
+            double k = 1.0 - eta * eta * (1.0 - cos_theta * cos_theta);
+
+            refraction.direction = normalize(eta * ray.direction + (eta * cos_theta - std::sqrt(k)) * hit.normal);
             double refractionDepth = scene.camera.z_far;
             trace(scene, refraction, ray_depth + 1, &refraction_color, &refractionDepth);
         }
@@ -166,6 +168,8 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
     for(auto light : scene.lights) {
         lightDirection = light.position - hit.position;
         double lightDistance = length(lightDirection);
+        double radius = light.radius;
+        double lightContribution = 1.0;
         lightDirection = normalize(lightDirection);
 
         Ray shadowRay;
@@ -175,22 +179,54 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
         double out_umbra_depth;
         Intersection hitUmbra;
 
-        if(!scene.container->intersect(shadowRay,EPSILON,lightDistance,&hitUmbra)) {
+        
 
-            double lambertCoef = std::max(dot(hit.normal, lightDirection),0.0);
+// Check if the light source has a radius
+        if(light.radius > 0.0) {
+            // Sample points within the light source's area for soft shadows
+            int numSamples = 5; // Number of samples
+            int hitCount = 0;
 
-            double3 halfwayVec = normalize(viewDirection + lightDirection);
-            double specularCoef = pow(std::max(dot(hit.normal, halfwayVec),0.0), material.shininess);
+            for(int i = 0; i < numSamples; i++) {
+                // Generate random offset within a disk
+                double2 randomOffset = random_in_unit_disk() * light.radius;
 
-            lightDiffuse = material.k_diffuse * color * lambertCoef;
+                // Compute sample point within the light source's area
+                double3 samplePoint = light.position + randomOffset.x * normalize(cross(lightDirection, {0, 1, 0})) +
+                                    randomOffset.y * normalize(cross(lightDirection, {1, 0, 0}));
 
-            lightSpecular = material.k_specular * (material.metallic * color + (1 - material.metallic))* specularCoef;//R
+                // Compute distance from hit point to sample point
+                double samplePointDistance = length(samplePoint - hit.position);
 
-            currentLight = (lightDiffuse + lightSpecular)* light.emission/pow(lightDistance,2);
-            finalLight += currentLight;
+                // Check if the shadow ray is occluded by geometry
+                Ray shadowRay;
+                shadowRay.origin = hit.position;
+                shadowRay.direction = normalize(samplePoint - hit.position);
+                Intersection hitUmbra;
+
+                if(scene.container->intersect(shadowRay, EPSILON, samplePointDistance, &hitUmbra)) {
+                    hitCount++;
+                }
+            }
+
+            // Calculate soft shadow coefficient based on number of unoccluded samples
+            lightContribution = 1.0 - double(hitCount) / numSamples;
         }
-        else
-            finalLight += double3 {0.0, 0.0, 0.0};
+        else{
+            if(scene.container->intersect(shadowRay,EPSILON,lightDistance,&hitUmbra)) lightContribution = 0.0;
+        }
+
+        double lambertCoef = std::max(dot(hit.normal, lightDirection),0.0);
+
+        double3 halfwayVec = normalize(viewDirection + lightDirection);
+        double specularCoef = pow(std::max(dot(hit.normal, halfwayVec),0.0), material.shininess);
+
+        lightDiffuse = material.k_diffuse * color * lambertCoef;
+
+        lightSpecular = material.k_specular * (material.metallic * color + (1 - material.metallic))* specularCoef;//R
+
+        currentLight = (lightDiffuse + lightSpecular)* light.emission/pow(lightDistance,2);
+        finalLight += currentLight * lightContribution;
     }
 
     ambient = scene.ambient_light * material.k_ambient * color;
