@@ -101,6 +101,7 @@ AABB construct_aabb(std::vector<double3> points) {
         maxZ = std::max(maxZ, point.z);
     }
 
+    /*
     //J'ai rajouté/importé std::count, juste pour imprimer,
     // JSP si on peut changer ou si ca affecte quoi que ce soit d'autre
     std::cout << "minX : " << minX <<"\n";
@@ -109,6 +110,7 @@ AABB construct_aabb(std::vector<double3> points) {
     std::cout << "maxX : " << maxX <<"\n";
     std::cout << "maxY : " << maxY <<"\n";
     std::cout << "maxZ : " << maxZ <<"\n";
+    */
 
     //(2)
     //ENSUITE, on appel la fonction retrieve_corners avec notre nouvel AABB

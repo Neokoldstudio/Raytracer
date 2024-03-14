@@ -118,7 +118,7 @@ AABB Sphere::compute_aabb() {
     //double minZ_Sphere = (Sphere::transform[2].x * sphere_locale.min.x) + (Sphere::transform[2].y * sphere_locale.min.y) + (Sphere::transform[2].z * sphere_locale.min.z) + (Sphere::transform[2].w * 1);
     //double3 pt_Shpere_min_globale = { minX_Shpere, minY_Shpere, minZ_Sphere};
     for (int i = 0; i < 4; ++i){
-        std::cout<<"transform x : " << Sphere::transform[i].x <<"    " << "transform y : " <<Sphere::transform[i].y <<"    " <<"transform z : " << Sphere::transform[i].z << "\n";
+        std::cout<<"transform x : " << Sphere::transform[i].x <<"    " << "transform y : " <<Sphere::transform[i].y <<"    " <<"transform z : " << Sphere::transform[i].z <<"    " <<"transform w : " << Sphere::transform[i].w<< "\n";
     }
 
     //1-On fait un nouvel objet AABB local (dans object.cpp) en appelant la fonction construct_aabb (dans aabb.cpp)
@@ -309,7 +309,7 @@ AABB Cylinder::compute_aabb() {
     pts_Cyl.push_back(pt_Cylmin);
     pts_Cyl.push_back(pt_Cylmax);
 
-    std::cout <<"cylindre? "<< pt_Cylmin.x;
+    std::cout <<"cylindre x min :  " << pt_Cylmin.x << "    " <<"cylindre y min :  " << pt_Cylmin.y << "    " <<"cylindre z min :  " << pt_Cylmin.z <<"\n";
 
     //construct_aabb(pts_Cyl);
     AABB cyl_locale = construct_aabb(pts_Cyl);
