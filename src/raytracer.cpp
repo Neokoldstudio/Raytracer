@@ -205,7 +205,7 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
 // Check if the light source has a radius
         if(light.radius > 0.0) {
             // Sample points within the light source's area for soft shadows
-            int numSamples = 1; // Number of samples
+            int numSamples = 5; // Number of samples
             int hitCount = 0;
 
             for(int i = 0; i < numSamples; i++) {
