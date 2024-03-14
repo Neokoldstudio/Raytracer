@@ -121,14 +121,18 @@ void Raytracer::trace(const Scene& scene,
             // Toutes les géométries sont des surfaces et non pas de volumes.
             Ray refraction;
             refraction.origin = hit.position;
-            double eta = 1/material.refractive_index;
-            double cos_theta = dot(-ray.direction, hit.normal);
-            // Calculate the discriminant
-            double k = 1.0 - eta * eta * (1.0 - cos_theta * cos_theta);
+            double eta = 1.0/material.refractive_index;
+           double cos_theta_i = dot(ray.direction, hit.normal);
 
-            refraction.direction = normalize(eta * ray.direction + (eta * cos_theta - std::sqrt(k)) * hit.normal);
+            double3 perpendicular = eta * (ray.direction - cos_theta_i * hit.normal);
+
+            double parallel_length = -sqrt(1.0 - pow(length(perpendicular),2));
+            double3 parallel = parallel_length * hit.normal;
+
+            refraction.direction = normalize(perpendicular + parallel);
             double refractionDepth = scene.camera.z_far;
             trace(scene, refraction, ray_depth + 1, &refraction_color, &refractionDepth);
+
         }
 		
 		*out_color = shade(scene, hit) + reflexion_color * material.k_reflection + refraction_color * material.k_refraction;
@@ -156,10 +160,27 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
     Material& material = ResourceManager::Instance()->materials[hit.key_material]; // Assuming you have access to the material data.
 
     double3 viewDirection = normalize(scene.camera.position - hit.position);
+
     double3 color = material.color_albedo;
+
+     // si une texture est présente, on récupère la couleur aux coordonées UV
+    if (material.texture_albedo.width() > 0 && material.texture_albedo.height() > 0) {
+        // Calculate UV coordinates
+        unsigned int texture_width = material.texture_albedo.width()-1;
+        unsigned int texture_height = material.texture_albedo.height()-1;
+        unsigned int u = (unsigned int)(hit.uv.x * texture_width);
+        unsigned int v = (unsigned int)(hit.uv.y * texture_height);
+        // Sample texture color using UV coordinates
+        unsigned char red, green, blue;
+        material.texture_albedo.get_pixel(u, v, red, green, blue);
+
+        // Convert color components to double values and normalize them
+        color = { (double)red / 255.0, (double)green / 255.0, (double)blue / 255.0 };
+    }
+
     double3 lightDirection;
     double3 lightDiffuse = {0.0,0.0,0.0};
-    double3 lightSpecular = {0.0,0.0,0.0};;
+    double3 lightSpecular = {0.0,0.0,0.0};
     double3 currentLight = {0.0,0.0,0.0};
     double3 finalLight = {0.0,0.0,0.0};
     double3 ambient = {0.0, 0.0, 0.0};
@@ -182,7 +203,7 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
         
 
 // Check if the light source has a radius
-        /*if(light.radius > 0.0) {
+        if(light.radius > 0.0) {
             // Sample points within the light source's area for soft shadows
             int numSamples = 1; // Number of samples
             int hitCount = 0;
@@ -214,7 +235,7 @@ double3 Raytracer::shade(const Scene& scene, Intersection hit)
         }
         else{
             if(scene.container->intersect(shadowRay,EPSILON,lightDistance,&hitUmbra)) lightContribution = 0.0;
-        }*/
+        }
 
         double lambertCoef = std::max(dot(hit.normal, lightDirection),0.0);
 

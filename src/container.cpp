@@ -29,7 +29,7 @@ bool Naive::intersect(Ray ray, double t_min, double t_max, Intersection* hit) {
             if(tempHit.depth < closestIntersection) {
                 hasIntersection = true;
                 closestIntersection = tempHit.depth;
-                *hit = tempHit; // Update hit with the intersection data
+                *hit = tempHit; // Update hit avec les donées de la nouvelle intersection
             }
         }
     }

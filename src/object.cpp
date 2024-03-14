@@ -36,6 +36,19 @@ bool Sphere::local_intersect(Ray ray,
     hit->depth = root;
     hit->position = ray.origin + root*ray.direction;
     hit->normal = normalize(hit->position);
+
+    // Calculate spherical coordinates
+    double phi = atan2(hit->normal.z, hit->normal.x) - (PI / 2.0);;
+    double theta = acos(hit->normal.y);
+
+    // Map spherical coordinates to UV coordinates
+    double u = 1-(phi + PI) / (2.0 * PI); // Map phi to range [0, 1]
+    double v = (theta / PI); // Map theta to range [0, 1]
+
+    // Shift and scale UV coordinates for desired pole positions
+    u = u + 0.5;
+    v = v;
+    hit->uv = { u, v };
     return true;
 }
 
@@ -56,6 +69,11 @@ bool Quad::local_intersect(Ray ray,
 							double t_min, double t_max, 
 							Intersection *hit)
 {
+    // si la composante Z est presque nulle, le rayon peut être considéré parallère au plan
+    if (std::abs(ray.direction.z) <= EPSILON) {
+        return false;
+    }
+
     double t = -ray.origin.z / ray.direction.z;
 
     if (t < t_min || t > t_max) {
@@ -70,10 +88,16 @@ bool Quad::local_intersect(Ray ray,
 
     double3 normal = { 0.0, 0.0, 1.0 };
 
+    if(dot(ray.direction, normal)<0)
+        normal = -normal;
+
+    double u = (point.x + half_size) / (2.0 * half_size);
+    double v = (point.y - half_size) / (2.0 * -half_size);
+
     hit->depth = t;
     hit->position = point;
-    hit->normal = normalize(normal);
-    hit->uv = {(point.x/half_size), (point.y/half_size)};
+    hit->normal = -normal;
+    hit->uv = {u,v};
 
     return true;
 }
@@ -93,10 +117,15 @@ AABB Quad::compute_aabb() {
 //
 // Pour plus de d'informations sur la géométrie, référez-vous à la classe object.h.
 bool Cylinder::local_intersect(Ray ray, 
-							   double t_min, double t_max, 
-							   Intersection *hit)
+                               double t_min, double t_max, 
+                               Intersection *hit)
 {
     double a = ray.direction.x * ray.direction.x + ray.direction.z * ray.direction.z;
+    // If 'a' is close to zero, the ray is nearly parallel to the cylinder's lateral surface
+    if (std::abs(a) < EPSILON) {
+        return false; // Ray is parallel to the cylinder
+    }
+
     double b = 2 * (ray.origin.x * ray.direction.x + ray.origin.z * ray.direction.z);
     double c = ray.origin.x * ray.origin.x + ray.origin.z * ray.origin.z - radius * radius;
 
@@ -117,25 +146,27 @@ bool Cylinder::local_intersect(Ray ray,
         }
     }
 
-    double3 point = ray.origin + root*ray.direction;
-    // Vérification de l'appartenance du point au cylindre (si le premier point est trop "loin", check le deuxième)
-    // évite des problèmes qui pourrait s'apparenter à du backface culling (ce n'en est pas en réalité, l'effet est trompeur)
-
+    double3 point = ray.origin + root * ray.direction;
     double3 normal = {point.x, 0.0, point.z};
 
     if (point.y < -half_height || point.y > half_height) {
+        // le point est à l'interieur, on utilise l'autre solution
         root = root2;
         point = ray.origin + root * ray.direction;
+        normal = -normal;
         if (point.y < -half_height || point.y > half_height) {
             return false;
         }
     }
-    else
-        normal = -normal;
 
     hit->depth = root;
     hit->position = point;
     hit->normal = normalize(normal);
+
+    double u = atan2(hit->position.z, -hit->position.x) / (2.0 * PI) + 0.5;
+    double v = (hit->position.y - half_height) / (2.0 * -half_height);
+
+    hit->uv = { u, v };
 
     return true;
 }
@@ -242,12 +273,27 @@ bool Mesh::intersect_triangle(Ray  ray,
 	if (hit->depth < t)
 		return false;
 
-	// Mettre à jour les informations de l'intersection
-	hit->depth = t;
-	hit->normal = normalize(cross(AB, AC));
-	hit->position = ray.origin + t * ray.direction;
+	 // Interpolation
+    double2 const &ti0 = tex_coords[tri[0].ti];
+    double2 const &ti1 = tex_coords[tri[1].ti];
+    double2 const &ti2 = tex_coords[tri[2].ti];
 
-	return true;
+    double2 interpolated_uv = ti0 + u * (ti1 - ti0) + v * (ti2 - ti0);
+
+    // Interpolate normals
+    double3 const &ni0 = normals[tri[1].ni];
+    double3 const &ni1 = normals[tri[1].ni];
+    double3 const &ni2 = normals[tri[1].ni];
+
+    double3 interpolated_normal = normalize(ni0 + u * (ni1 - ni0) + v * (ni2 - ni0));
+
+    // Update intersection information
+    hit->depth = t;
+    hit->position = ray.origin + t * ray.direction;
+    hit->normal = interpolated_normal;
+    hit->uv = interpolated_uv;
+
+    return true;
 }
 
 // @@@@@@ VOTRE CODE ICI
