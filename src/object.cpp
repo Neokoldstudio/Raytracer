@@ -211,6 +211,7 @@ AABB Sphere::compute_aabb() {
     //(2) : Trouver les points globaux
 
     //ICI, JAI 2 FACONS:
+    /*
     //                  1-On transforme le pt milieu, puis on transforme le rayon et on refais les mêmes calculs
     //                      MAIS, chui certain de la boite est allignée avec les axes
     //                      (Je crois pas que c'est bon, car utiliser les fonctions du aabb ne semble pas nécessaire.)
@@ -219,7 +220,7 @@ AABB Sphere::compute_aabb() {
     //                  2-On transforme les points de la liste des coins locaux avec la matrice de transformation
     //                      On transforme aussi le rayon, juste pour être sûr.
     //                      (JSP si j'ai fais de la bonne facon)
-
+    */
 
     //FACON 2- :
 
@@ -234,7 +235,7 @@ AABB Sphere::compute_aabb() {
         //On store le point, car si j'essaie de le mettre directement dans la liste de coins,ca bugg
         double3 pt_Transforme_LtoG = {x_Transformation_Globale, y_Transformation_Globale, z_Transformation_Globale};
         //On store les points dans la liste de coins globaux
-        Coins_Globaux.push_back(pt_Transforme_LtoG);
+        pts_Sphere_Globale.push_back(pt_Transforme_LtoG);
     }
 
     //IMPRESSION pour vérification
@@ -243,10 +244,10 @@ AABB Sphere::compute_aabb() {
     }
 
     //On fait le aabb global, mais avec la liste des points globaux, on veut trouver le min et le max
-    AABB Sphere_Globale = construct_aabb(Coins_Globaux);
+    AABB Sphere_Globale = construct_aabb(pts_Sphere_Globale);
 
     //Pour s'assurer que ca soit alligné avec les axes, on appel retrieve corners
-    Coins_Globaux = retrieve_corners(Sphere_Locale);
+    Coins_Globaux = retrieve_corners(Sphere_Globale);
 
     for (const auto& point : Coins_Globaux){
         std::cout << "coins globaux 2 : (" << point.x << ", " << point.y << ", " << point.z << ")" << std::endl;
@@ -352,6 +353,8 @@ AABB Quad::compute_aabb() {
 
     //2-ESPACE GLOBAL
 
+    //Je crois pas que ca c'est encore bon
+    /*
     //1-On calcule la transformation sur les points min et max en premier
     //  on va voir si le rectangle s'est transformé en plan,
     //      je crois que c'est plus efficace que de faire un aabb et ensuite le modifier ou devoir le suprimer et en refaire un autre(*)
@@ -369,6 +372,7 @@ AABB Quad::compute_aabb() {
 
     pts_Quad_Globale.push_back(pt_Quad_Global_min);
     pts_Quad_Globale.push_back(pt_Quad_Global_max);
+    */
 
     //Puisqu'on va faire la transformation du carré, on veut voir si on ne l'a pas transformé en un plan
     //EX : SI x est 0 pour le min et le max, alors le rectangle est un plan YZ
@@ -396,7 +400,7 @@ AABB Quad::compute_aabb() {
         //pt_Quad_Global_max =
     }
 
-    //Si les changements sont correct, on va maintenant faire la transformation des points
+    //On va transformer les points
     //Devrait être la même logique que pour la sphère
     for (const auto& point : Coins_Quad_Locaux){
         //Applique transformation sur chacun des coins
@@ -406,11 +410,12 @@ AABB Quad::compute_aabb() {
 
         //On store le point, car si j'essaie de le mettre directement dans la liste de coins,ca bugg
         double3 pt_Transforme_LtoG = {x_Transformation_Globale, y_Transformation_Globale, z_Transformation_Globale};
-        //On store les points dans la liste de coins globaux
-        Coins_Quad_Globaux.push_back(pt_Transforme_LtoG);
+        //On store les points dans la liste de points globaux
+        pts_Quad_Globale.push_back(pt_Transforme_LtoG);
     }
 
     //On fait le aabb
+    //Quand on fait le aabb avec la liste des points, le construct va automatiquement trouver le min et le max
     AABB Quad_Global = construct_aabb(pts_Quad_Globale);
     Coins_Quad_Globaux = retrieve_corners(Quad_Global);
 
@@ -492,6 +497,17 @@ bool Cylinder::local_intersect(Ray ray,
 // Occupez-vous de compléter cette fonction afin de calculer le AABB pour le cylindre.
 // Il faut que le AABB englobe minimalement notre objet à moins que l'énoncé prononce le contraire (comme ici).
 AABB Cylinder::compute_aabb() {
+
+    //On fait un conteneur pts dans lequel on va mettre les pts
+    std::vector<double3> pts_Cyl_Locale;
+    //On fait une liste qui contient les coins raportés par retrieve corners
+    std::vector<double3> Coins_Cyl_Locaux;
+
+    //On fait la même chose, mais pour les coor globales
+    std::vector<double3> pts_Cyl_Globale;
+    //On fait une liste qui contient les coins raportés par retrieve corners
+    std::vector<double3> Coins_Cyl_Globaux;
+
 	return Object::compute_aabb();
 }
 
