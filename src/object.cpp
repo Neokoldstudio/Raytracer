@@ -186,7 +186,7 @@ bool Cylinder::local_intersect(Ray ray,
 // Il faut que le AABB englobe minimalement notre objet à moins que l'énoncé prononce le contraire (comme ici).
 AABB Cylinder::compute_aabb() {
     // Get the transformation matrix
-    double4x4 trans = transform;
+    double4x4 trans = Cylinder::transform;
 
     // Calculate the world-space coordinates of the base center (0, 0, 0) of the cylinder
     double3 center = mul(trans, double4{0.0, 0.0, 0.0, 1.0}).xyz();
@@ -204,9 +204,17 @@ AABB Cylinder::compute_aabb() {
         dot(radiusVector, zAxis)
     };
 
+    //ESSAIES:
+    //1-Si fonctionne pas, mettre w min à -1 --MARCHE PAS
+    //2-Si fonctionne pas non plus, mettre double3 ---Faut changer le return aussi
+    //double3 min_point = {center.x - rotatedRadius.x, center.y - rotatedRadius.y, center.z - rotatedRadius.z/*, 1.0*/};
+    //double3 max_point = {center.x + rotatedRadius.x, center.y + rotatedRadius.y, center.z + rotatedRadius.z/*,1.0*/};
+    //return AABB{min_point/*.xyz()*/, max_point/*.xyz()*/};
+
+    //NORMAL:
     // Calculate the minimum and maximum points of the AABB
-    double4 min_point = {center.x - rotatedRadius.x,center.y - rotatedRadius.y,center.z - rotatedRadius.z,1.0};
-    double4 max_point = {center.x + rotatedRadius.x,center.y + rotatedRadius.y,center.z + rotatedRadius.z,1.0};
+    double4 min_point = {center.x - rotatedRadius.x, center.y - rotatedRadius.y, center.z - rotatedRadius.z, 1.0};
+    double4 max_point = {center.x + rotatedRadius.x, center.y + rotatedRadius.y, center.z + rotatedRadius.z,1.0};
 
     // Return the AABB
     return AABB{min_point.xyz(), max_point.xyz()};
