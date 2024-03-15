@@ -189,20 +189,29 @@ AABB Cylinder::compute_aabb() {
     double4x4 trans = Cylinder::transform;
 
     // Calculate the world-space coordinates of the base center (0, 0, 0) of the cylinder
+    //centre global
     double3 center = mul(trans, double4{0.0, 0.0, 0.0, 1.0}).xyz();
 
+    //What if on fait juste comme la sphere, mais on rajoute le half_height
+    double4 min_point_try = {center.x - Cylinder::radius - Cylinder::half_height, center.y - radius - Cylinder::half_height, center.z - radius - Cylinder::half_height, 1.0};
+    double4 max_point_try = {center.x + Cylinder::radius + Cylinder::half_height, center.y + radius + Cylinder::half_height, center.z + radius + Cylinder::half_height, 1.0};
+
+
+    /*
     // Calculate the directions of the cylinder's axes after rotation
     double3 xAxis = normalize(mul(trans, double4{1.0, 0.0, 0.0, 0.0}).xyz());
     double3 yAxis = normalize(mul(trans, double4{0.0, 1.0, 0.0, 0.0}).xyz());
     double3 zAxis = normalize(mul(trans, double4{0.0, 0.0, 1.0, 0.0}).xyz());
 
+
     // Calculate the radius along each axis after rotation
-    double3 radiusVector = {radius, radius, half_height}; // Half_height is along z-axis
+    double3 radiusVector = {Cylinder::radius,Cylinder::radius, Cylinder::half_height}; // Half_height is along z-axis
     double3 rotatedRadius = {
         dot(radiusVector, xAxis),
         dot(radiusVector, yAxis),
         dot(radiusVector, zAxis)
     };
+    */
 
     //ESSAIES:
     //1-Si fonctionne pas, mettre w min à -1 --MARCHE PAS
@@ -211,13 +220,18 @@ AABB Cylinder::compute_aabb() {
     //double3 max_point = {center.x + rotatedRadius.x, center.y + rotatedRadius.y, center.z + rotatedRadius.z/*,1.0*/};
     //return AABB{min_point/*.xyz()*/, max_point/*.xyz()*/};
 
+    return AABB{min_point_try.xyz(), max_point_try.xyz()};
+
     //NORMAL:
     // Calculate the minimum and maximum points of the AABB
-    double4 min_point = {center.x - rotatedRadius.x, center.y - rotatedRadius.y, center.z - rotatedRadius.z, 1.0};
-    double4 max_point = {center.x + rotatedRadius.x, center.y + rotatedRadius.y, center.z + rotatedRadius.z,1.0};
+    //double4 min_point = {center.x - rotatedRadius.x, center.y - rotatedRadius.y, center.z - rotatedRadius.z, 1.0};
+    //double4 max_point = {center.x + rotatedRadius.x, center.y + rotatedRadius.y, center.z + rotatedRadius.z,1.0};
+
 
     // Return the AABB
-    return AABB{min_point.xyz(), max_point.xyz()};
+    //return AABB{min_point.xyz(), max_point.xyz()};
+
+    //2-essayer de changer pour match ca : return construct_aabb(transformed_corners);
 }
 // @@@@@@ VOTRE CODE ICI
 // Occupez-vous de compléter cette fonction afin de trouver l'intersection avec un mesh.
