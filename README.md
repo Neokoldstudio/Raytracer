@@ -19,8 +19,13 @@ this program is a basic raytracing renderer implementing the following features:
 - hard shadows
 - soft shadows (only computed with spherical lights)
 
+# 3: Accelerative structures :
+- AABB calculation for all shapes
+- Naïve AABB container
+- BVH
+
 Additional notes: 
-this is a CPU based raytracer, so it does not apply to real-time-rendering
+please note that this is a CPU-based raytracer, so it does not apply to real-time-rendering
 
 this renderer was made for our Computer Graphics class at the University of Montreal, during our final year as undergraduates (2024). 
 The main structure of the renderer has been written prior to our contribution. 
