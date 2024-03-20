@@ -5,7 +5,7 @@ authors: Paul Godbert and Laurant Bouchard
   <img src="image.png">
 </p>
 
-# Description
+# Features
 this program is a basic raytracing renderer implementing the following features:
 
 ### 1: shapes defined
