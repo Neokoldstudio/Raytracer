@@ -29,8 +29,15 @@ this program is a basic raytracing renderer implementing the following features:
 - BVH
 
 # Build
-this project is built using CMAKE
-`qsddqsd`
+this project is built using CMAKE so all you need to do is execute the following commands :
+```bash
+git clone https://github.com/Neokoldstudio/Raytracer.git
+cd Raytracer
+mkdir build
+cd build
+cmake ..
+make
+```
 
 Additional notes: 
 please note that this is a CPU-based raytracer, so it does not apply to real-time-rendering
