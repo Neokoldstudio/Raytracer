@@ -4,7 +4,7 @@ authors: Paul Godbert and Laurant Bouchard
 ![Alt text](?raw=true "Exemple showcasing the result of the renderer")
 
 <p align="center">
-  <img width="460" height="300" src="image.png">
+  <img src="image.png">
 </p>
 
 # Description
