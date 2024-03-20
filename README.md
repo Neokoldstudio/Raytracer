@@ -1,9 +1,7 @@
 # Raytracer rendering engine
 authors: Paul Godbert and Laurant Bouchard
-
-
   
-<p align=center>![Alt text](image.png?raw=true "Exemple showcasing the result of the renderer")<\p>
+![Alt text](image.png?raw=true "Exemple showcasing the result of the renderer")
 
 # Description
 this program is a basic raytracing renderer implementing the following features:
