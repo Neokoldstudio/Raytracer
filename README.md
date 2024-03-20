@@ -1,8 +1,11 @@
-<p align=center>
 # Raytracer rendering engine
 authors: Paul Godbert and Laurant Bouchard
 
+<p align=center>
+  
 ![Alt text](image.png?raw=true "Exemple showcasing the result of the renderer")
+
+<\p>
 
 # Description
 this program is a basic raytracing renderer implementing the following features:
@@ -32,4 +35,3 @@ please note that this is a CPU-based raytracer, so it does not apply to real-tim
 
 this renderer was made for our Computer Graphics class at the University of Montreal, during our final year as undergraduates (2024). 
 The main structure of the renderer has been written prior to our contribution. 
-<\p>
