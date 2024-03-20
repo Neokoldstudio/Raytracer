@@ -1,3 +1,4 @@
+<p align=center>
 # Raytracer rendering engine
 authors: Paul Godbert and Laurant Bouchard
 
@@ -31,3 +32,4 @@ please note that this is a CPU-based raytracer, so it does not apply to real-tim
 
 this renderer was made for our Computer Graphics class at the University of Montreal, during our final year as undergraduates (2024). 
 The main structure of the renderer has been written prior to our contribution. 
+<\p>
