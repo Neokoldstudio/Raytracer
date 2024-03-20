@@ -1,5 +1,6 @@
 # Raytracer rendering engine
 authors: Paul Godbert and Laurant Bouchard
+Platforms support : Windows / Linux
 
 <p align="center">
   <img src="image.png">
